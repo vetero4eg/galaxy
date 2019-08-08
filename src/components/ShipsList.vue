@@ -1,5 +1,5 @@
 <template>
-  <v-flex class="mt-4 mb-4">
+  <v-flex v-if="!!showedShips.length" class="mt-4 mb-4">
     <v-list light v-for="ship in showedShips" :key="ship.name">
       <v-list-item :to="getPath(ship.url)" link class="ship">
         <v-list-item-content>
@@ -9,7 +9,11 @@
     </v-list>
     <Pagination :perPage="perPage" :count="count" class="mt-8 mb-8"/>
   </v-flex>
-
+  <v-flex v-else>
+    <h2 class="display-1 mt-12 mb-10">
+      Info not found
+    </h2>
+  </v-flex>
 </template>
 
 <script>
