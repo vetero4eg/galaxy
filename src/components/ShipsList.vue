@@ -7,7 +7,7 @@
         </v-list-item-content>
       </v-list-item>
     </v-list>
-    <Pagination :perPage="perPage" :count="count" class="mt-8 mb-8" ref="pagination"/>
+    <Pagination :perPage="perPage" :count="count" class="mt-8 mb-8"/>
   </v-flex>
 
 </template>
@@ -20,7 +20,7 @@ export default {
     Pagination,
   },
   props: {
-    names: {
+    ships: {
       type: Array,
       required: true,
     },
@@ -31,17 +31,22 @@ export default {
   },
   data: () => ({
     perPage: 8,
-    count: 0,
   }),
   computed: {
     page() {
-      return this.$route.query.page;
+      return parseInt(this.$route.query.page, 10) || 1;
     },
-    ships() {
-      return this.$store.getters.SHIPS;
+    names() {
+      return this.ships.map(el => el.name);
+    },
+    filteredNames() {
+      if (this.search) {
+        return this.names.filter(el => el.includes(this.search));
+      }
+      return this.names;
     },
     searchedShips() {
-      return this.ships.filter(el => this.names.includes(el.name));
+      return this.ships.filter(el => this.filteredNames.includes(el.name));
     },
     showedShips() {
       if (this.searchedShips.length > this.perPage) {
@@ -51,20 +56,15 @@ export default {
       }
       return this.searchedShips;
     },
+    count() {
+      return this.searchedShips.length;
+    },
   },
   methods: {
     getPath(url) {
       const paths = url.split('/');
       return `/${paths[5]}/`;
     },
-  },
-  watch: {
-    searchedShips() {
-      this.count = this.searchedShips.length;
-    },
-  },
-  beforeMount() {
-    this.count = this.searchedShips.length;
   },
 };
 </script>

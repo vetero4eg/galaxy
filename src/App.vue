@@ -7,14 +7,7 @@
     </v-app-bar>
     <v-content>
       <v-container>
-        <div v-if="loading" class="text-center mt-12">
-          <v-progress-circular
-            :size="70"
-            :width="7"
-            color="primary"
-            indeterminate
-          ></v-progress-circular>
-        </div>
+        <Loader v-if="loading"/>
         <router-view v-else />
       </v-container>
     </v-content>
@@ -28,16 +21,22 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import Loader from '@/components/Loader.vue';
 
 export default {
   name: 'App',
+  components: { Loader },
   data: () => ({
     loading: true,
   }),
+  methods: {
+    ...mapActions({
+      getShips: 'GET_SHIPS',
+    }),
+  },
   async created() {
-    if (this.ships !== []) {
-      await this.$store.dispatch('GET_SHIPS');
-    }
+    await this.getShips();
     this.loading = false;
   },
 };

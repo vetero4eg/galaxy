@@ -3,7 +3,10 @@
     text-center
     wrap
   >
-    <v-flex v-if="isAlive" mb-4>
+    <v-flex v-if="loading">
+      <Loader/>
+    </v-flex>
+    <v-flex v-else mb-4>
       <h1 class="display-2 font-weight-bold mt-12 mb-10">
         Starship {{ ship.name }}
       </h1>
@@ -16,17 +19,16 @@
         </tbody>
       </v-simple-table>
     </v-flex>
-    <v-flex v-else>
-      <h1 class="display-2 font-weight-bold mt-12 mb-10">
-        Information not found
-      </h1>
-    </v-flex>
   </v-layout>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex';
+import Loader from '@/components/Loader.vue';
+
 export default {
   name: 'info',
+  components: { Loader },
   props: {
     id: {
       type: String,
@@ -35,16 +37,20 @@ export default {
   },
   data: () => ({
     loading: true,
-    ship: {},
     filmTitle: [],
     pilotsNames: [],
+    renderShip: {},
   }),
   computed: {
-    isAlive() {
-      return !!Object.keys(this.$store.getters.CURRENT).length;
-    },
+    ...mapGetters({
+      ship: 'CURRENT',
+    }),
   },
   methods: {
+    ...mapActions({
+      getShip: 'GET_SHIP',
+      getTempInfo: 'GET_INFO',
+    }),
     transformText(text) {
       return text.split('_').join(' ').toUpperCase();
     },
@@ -60,7 +66,7 @@ export default {
       return new Intl.DateTimeFormat('ru-Ru', options).format(new Date(value));
     },
     async getInfo(url, target) {
-      await this.$store.dispatch('GET_INFO', url);
+      await this.getTempInfo(url);
       const info = this.$store.getters.INFO;
       const value = info.name || info.title || 'n/a';
       this[target] = [...this[target], value];
@@ -74,16 +80,16 @@ export default {
     },
   },
   async created() {
-    await this.$store.dispatch('GET_SHIP', this.id);
-    this.ship = this.$store.getters.CURRENT;
+    await this.getShip(this.id);
     await this.getAllInfo(this.ship.pilots, 'pilotsNames');
     await this.getAllInfo(this.ship.films, 'filmTitle');
 
-    this.ship.created = this.dataFilter(new Date(this.ship.created));
-    this.ship.edited = this.dataFilter(new Date(this.ship.edited));
-    this.ship.pilots = this.pilotsNames.join(', ');
-    this.ship.films = this.filmTitle.join(', ');
-    // this.ship.pilots = await this.getInfo(this.ship.pilots[0]);
+    this.renderShip = this.ship;
+    this.renderShip.created = this.dataFilter(new Date(this.ship.created));
+    this.renderShip.edited = this.dataFilter(new Date(this.ship.edited));
+    this.renderShip.pilots = this.pilotsNames.join(', ');
+    this.renderShip.films = this.filmTitle.join(', ');
+    this.loading = false;
   },
 };
 </script>

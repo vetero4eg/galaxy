@@ -33,12 +33,12 @@ export default {
   },
   methods: {
     step() {
-      this.$router.push({ query: { ...this.$route.query, page: this.page } });
+      this.$router.replace({ query: { ...this.$route.query, page: this.page } });
     },
   },
   created() {
     this.page = parseInt(this.$route.query.page, 10) || 1;
-    this.$router.push({ query: { page: this.page, ...this.$route.query } });
+    this.$router.replace({ query: { page: this.page, ...this.$route.query } });
   },
   beforeUpdate() {
     this.page = parseInt(this.$route.query.page, 10);

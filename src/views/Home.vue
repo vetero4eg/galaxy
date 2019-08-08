@@ -3,7 +3,7 @@
     text-center
     wrap
   >
-    <v-flex v-if="isAlive">
+    <v-flex v-if="ships">
       <h1 class="display-2 font-weight-bold mt-12 mb-10">
         Starships List
       </h1>
@@ -19,7 +19,7 @@
         ></v-text-field>
       </v-sheet>
       <ShipsList
-        :names="filter"
+        :ships="ships"
         :search="search"
       />
     </v-flex>
@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import ShipsList from '@/components/ShipsList.vue';
 
 export default {
@@ -39,39 +40,23 @@ export default {
     ShipsList,
   },
   data: () => ({
-    search: '',
+    search: undefined,
   }),
   computed: {
-    isAlive() {
-      return !!this.$store.getters.SHIPS.length;
-    },
-    names() {
-      return this.ships.map(el => el.name);
-    },
-    filter() {
-      if (this.search) {
-        return this.names.filter(el => el.includes(this.search));
-      }
-      return this.names;
-    },
-    ships() {
-      return this.$store.getters.SHIPS;
-    },
+    ...mapGetters({
+      ships: 'SHIPS',
+    }),
   },
   beforeMount() {
-    if (this.$route.query.search) {
-      this.search = this.$route.query.search;
-      this.$router.push({ name: 'home', query: { ...this.$route.query, search: this.search } });
-    }
-    this.search = '';
-    this.$router.push({ name: 'home', query: { ...this.$route.query } });
+    this.search = this.$route.query.search ? this.$route.query.search : undefined;
+    this.$router.replace({ name: 'home', query: { ...this.$route.query, search: this.search } });
   },
   watch: {
     search() {
       if (!this.search) {
-        this.search = '';
+        this.search = undefined;
       }
-      this.$router.push({ name: 'home', query: { page: '1', search: this.search } });
+      this.$router.push({ name: 'home', query: { page: 1, search: this.search } });
     },
   },
 };
